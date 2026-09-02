@@ -56,7 +56,7 @@ systemctl restart networking
 ip a show ens34
 ```
 
-📖 Source : [Debian Wiki — NetworkConfiguration](https://wiki.debian.org/NetworkConfiguration)
+  Source : [Debian Wiki — NetworkConfiguration](https://wiki.debian.org/NetworkConfiguration)
 
 ## 3. DHCP
 
@@ -92,7 +92,7 @@ systemctl enable --now isc-dhcp-server
 systemctl status isc-dhcp-server
 ```
 
-📖 Source : [ISC — Documentation officielle DHCP](https://www.isc.org/dhcp/)
+  Source : [ISC — Documentation officielle DHCP](https://www.isc.org/dhcp/)
 
 ## 4. DNS
 
@@ -145,7 +145,7 @@ systemctl enable --now bind9
 systemctl status bind9
 ```
 
-📖 Source : [ISC — Documentation officielle BIND9](https://bind9.readthedocs.io/en/latest/)
+  Source : [ISC — Documentation officielle BIND9](https://bind9.readthedocs.io/en/latest/)
 
 ## 5. Routage NAT (LAN → WAN)
 
@@ -167,7 +167,7 @@ apt update && apt install -y nginx
 
 > Les workers Nginx (paquet nginx.org) tournent sous l'utilisateur système **`nginx`**, pas `www-data`. Toutes les permissions de fichiers/sockets PHP-FPM ci-dessous en tiennent compte.
 
-📖 Source : [NGINX — Installing NGINX Open Source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/)
+  Source : [NGINX — Installing NGINX Open Source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/)
 
 ## 7. PHP 7.4 et 8.3 — compilation depuis wget/tar.gz
 
@@ -192,7 +192,7 @@ wget https://museum.php.net/php7/php-7.4.33.tar.gz
 
 > PHP 7.4 étant en fin de vie (EOL), ses archives sont conservées sur `museum.php.net` plutôt que sur le site principal.
 
-📖 Sources :
+  Sources :
 - [PHP.net — Downloads](https://www.php.net/downloads)
 - [PHP Museum — Archives des anciennes versions](https://museum.php.net/)
 
@@ -249,7 +249,7 @@ make install
 cd ..
 ```
 
-📖 Source : [PHP Manual — Installation Unix/Linux](https://www.php.net/manual/en/install.unix.php)
+  Source : [PHP Manual — Installation Unix/Linux](https://www.php.net/manual/en/install.unix.php)
 
 ### 7.5 Configuration FPM (sockets et permissions)
 
@@ -316,7 +316,7 @@ systemctl status php8.3-fpm php7.4-fpm
 ls -l /run/php/
 ```
 
-📖 Source : [freedesktop.org — systemd.service documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html)
+  Source : [freedesktop.org — systemd.service documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html)
 
 ### 7.7 Vérification des extensions compilées
 
@@ -336,7 +336,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -addext "subjectAltName=DNS:*.starfleet.lan,DNS:starfleet.lan"
 ```
 
-📖 Source : [OpenSSL — openssl-req](https://docs.openssl.org/master/man1/openssl-req/)
+  Source : [OpenSSL — openssl-req](https://docs.openssl.org/master/man1/openssl-req/)
 
 ## 9. Sites web et vhosts Nginx
 
@@ -398,7 +398,7 @@ apt update && apt install -y mariadb-server mariadb-client
 systemctl enable --now mariadb
 ```
 
-📖 Source : [MariaDB — Package Repository Setup and Usage](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/mariadb-package-repository-setup-and-usage)
+  Source : [MariaDB — Package Repository Setup and Usage](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/mariadb-package-repository-setup-and-usage)
 
 ## 11. phpMyAdmin — via wget
 
@@ -447,7 +447,7 @@ nginx -t && systemctl restart nginx
 
 > Authentification phpMyAdmin par **compte MariaDB** (ex. `root`), distinct des comptes LDAP utilisés côté sites web.
 
-📖 Source : [phpMyAdmin — Documentation officielle](https://docs.phpmyadmin.net/)
+Source : [phpMyAdmin — Documentation officielle](https://docs.phpmyadmin.net/)
 
 ## 12. FTP (vsftpd)
 
@@ -477,7 +477,7 @@ systemctl enable --now vsftpd
 
 > La directive `listen=YES` est indispensable pour un fonctionnement autonome via systemd (sinon `500 OOPS: vsftpd: not configured for standalone`).
 
-📖 Source : [vsftpd — Documentation de configuration](https://security.appspot.com/vsftpd/vsftpd_conf.html)
+Source : [vsftpd — Documentation de configuration](https://security.appspot.com/vsftpd/vsftpd_conf.html)
 
 ## 13. LDAP
 
@@ -492,7 +492,7 @@ slapcat -n 0 | grep olcSuffix
 ```
 Doit afficher `dc=starfleet,dc=lan`.
 
-📖 Source : [OpenLDAP — Documentation officielle](https://openldap.org/doc/)
+Source : [OpenLDAP — Documentation officielle](https://openldap.org/doc/)
 
 ## 14. Cockpit + reverse proxy
 
@@ -519,7 +519,7 @@ EOF
 nginx -t && systemctl restart nginx
 ```
 
-📖 Source : [Cockpit Project — Documentation officielle](https://cockpit-project.org/documentation.html)
+Source : [Cockpit Project — Documentation officielle](https://cockpit-project.org/documentation.html)
 
 ## 15. Pare-feu
 
@@ -558,7 +558,7 @@ netfilter-persistent save
 
 > Le SSH est ouvert **sur les deux interfaces** : administration possible depuis le LAN et depuis le WAN (poste hôte). Une politique DROP appliquée sans cette double règle bloquerait l'administrateur lui-même.
 
-📖 Source : [Netfilter/iptables — Documentation officielle](https://www.netfilter.org/documentation/index.html#documentation-howto)
+Source : [Netfilter/iptables — Documentation officielle](https://www.netfilter.org/documentation/index.html#documentation-howto)
 
 ## 16. Suppression de sudo
 
