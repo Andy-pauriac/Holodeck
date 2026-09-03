@@ -24,7 +24,9 @@ Reconstruction complète de la VM Serveur, avec une contrainte particulière : *
 14. [Cockpit](#14-cockpit--reverse-proxy)
 15. [Pare-feu](#15-pare-feu)
 16. [Suppression de sudo](#16-suppression-de-sudo)
-17. [Sources](#17-sources)
+17. [VM Cliente — passage en interface graphique](#17-vm-cliente--passage-en-interface-graphique)
+18. [Pour aller plus loin](#18-pour-aller-plus-loin)
+19. [Sources](#19-sources)
 
 ---
 
@@ -56,7 +58,7 @@ systemctl restart networking
 ip a show ens34
 ```
 
-  Source : [Debian Wiki — NetworkConfiguration](https://wiki.debian.org/NetworkConfiguration)
+Source : [Debian Wiki — NetworkConfiguration](https://wiki.debian.org/NetworkConfiguration)
 
 ## 3. DHCP
 
@@ -92,7 +94,7 @@ systemctl enable --now isc-dhcp-server
 systemctl status isc-dhcp-server
 ```
 
-  Source : [ISC — Documentation officielle DHCP](https://www.isc.org/dhcp/)
+Source : [ISC — Documentation officielle DHCP](https://www.isc.org/dhcp/)
 
 ## 4. DNS
 
@@ -145,7 +147,7 @@ systemctl enable --now bind9
 systemctl status bind9
 ```
 
-  Source : [ISC — Documentation officielle BIND9](https://bind9.readthedocs.io/en/latest/)
+Source : [ISC — Documentation officielle BIND9](https://bind9.readthedocs.io/en/latest/)
 
 ## 5. Routage NAT (LAN → WAN)
 
@@ -167,7 +169,7 @@ apt update && apt install -y nginx
 
 > Les workers Nginx (paquet nginx.org) tournent sous l'utilisateur système **`nginx`**, pas `www-data`. Toutes les permissions de fichiers/sockets PHP-FPM ci-dessous en tiennent compte.
 
-  Source : [NGINX — Installing NGINX Open Source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/)
+Source : [NGINX — Installing NGINX Open Source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/)
 
 ## 7. PHP 7.4 et 8.3 — compilation depuis wget/tar.gz
 
@@ -192,7 +194,7 @@ wget https://museum.php.net/php7/php-7.4.33.tar.gz
 
 > PHP 7.4 étant en fin de vie (EOL), ses archives sont conservées sur `museum.php.net` plutôt que sur le site principal.
 
-  Sources :
+Sources :
 - [PHP.net — Downloads](https://www.php.net/downloads)
 - [PHP Museum — Archives des anciennes versions](https://museum.php.net/)
 
@@ -249,7 +251,7 @@ make install
 cd ..
 ```
 
-  Source : [PHP Manual — Installation Unix/Linux](https://www.php.net/manual/en/install.unix.php)
+Source : [PHP Manual — Installation Unix/Linux](https://www.php.net/manual/en/install.unix.php)
 
 ### 7.5 Configuration FPM (sockets et permissions)
 
@@ -316,7 +318,7 @@ systemctl status php8.3-fpm php7.4-fpm
 ls -l /run/php/
 ```
 
-  Source : [freedesktop.org — systemd.service documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html)
+Source : [freedesktop.org — systemd.service documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html)
 
 ### 7.7 Vérification des extensions compilées
 
@@ -336,7 +338,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -addext "subjectAltName=DNS:*.starfleet.lan,DNS:starfleet.lan"
 ```
 
-  Source : [OpenSSL — openssl-req](https://docs.openssl.org/master/man1/openssl-req/)
+Source : [OpenSSL — openssl-req](https://docs.openssl.org/master/man1/openssl-req/)
 
 ## 9. Sites web et vhosts Nginx
 
@@ -398,7 +400,7 @@ apt update && apt install -y mariadb-server mariadb-client
 systemctl enable --now mariadb
 ```
 
-  Source : [MariaDB — Package Repository Setup and Usage](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/mariadb-package-repository-setup-and-usage)
+Source : [MariaDB — Package Repository Setup and Usage](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/mariadb-package-repository-setup-and-usage)
 
 ## 11. phpMyAdmin — via wget
 
@@ -568,7 +570,113 @@ Effectuée en tout dernier, une fois l'ensemble des services validés (toute cor
 gpasswd -d <utilisateur> sudo
 ```
 
-## 17. Sources
+## 17. VM Cliente — passage en interface graphique
+
+```bash
+su -
+cat /etc/apt/sources.list
+```
+Si seul le CD-ROM est listé, remplacer par les dépôts réseau (adapter `trixie`/`bookworm` selon `cat /etc/debian_version`) :
+```bash
+tee /etc/apt/sources.list > /dev/null << 'EOF'
+deb http://deb.debian.org/debian trixie main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian trixie-updates main contrib non-free non-free-firmware
+deb http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
+EOF
+```
+
+```bash
+ping -c3 deb.debian.org
+```
+*(nécessite que le NAT/routage soit déjà actif côté Serveur — voir section 5)*
+
+```bash
+apt update && apt upgrade -y
+apt install -y task-xfce-desktop lightdm firefox-esr open-vm-tools-desktop
+systemctl enable --now open-vm-tools
+reboot
+```
+
+Source : [Debian Wiki — Xfce](https://wiki.debian.org/Xfce)
+
+## 18. Pour aller plus loin
+
+### 18.1 VS Code Server (vscore.starfleet.lan)
+
+```bash
+su -
+curl -fsSL https://code-server.dev/install.sh | sh
+systemctl enable --now code-server@root
+```
+
+Définir un mot de passe d'accès :
+```bash
+nano ~/.config/code-server/config.yaml
+```
+```yaml
+bind-addr: 127.0.0.1:8080
+auth: password
+password: MotDePasseSolide123!
+cert: false
+```
+```bash
+systemctl restart code-server@root
+```
+
+Vhost Nginx en reverse proxy :
+```bash
+tee /etc/nginx/conf.d/vscore.conf > /dev/null << 'EOF'
+server {
+    listen 443 ssl;
+    server_name vscore.starfleet.lan;
+    ssl_certificate     /etc/ssl/starfleet/starfleet.crt;
+    ssl_certificate_key /etc/ssl/starfleet/starfleet.key;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}
+EOF
+nginx -t && systemctl restart nginx
+```
+
+N'oublier pas l'enregistrement DNS (`vscore IN A 192.168.10.1` dans `/etc/bind/db.starfleet.lan`, avec incrémentation du Serial) puis `systemctl restart bind9`.
+
+Source : [code-server — Documentation officielle (Coder)](https://coder.com/docs/code-server)
+
+### 18.2 Script de sauvegarde automatisée
+
+Sauvegarde dans `/root/backups/` (réseau, DHCP, DNS, Nginx, PHP, MariaDB, FTP, LDAP, SSL, pare-feu, paquets installés, services actifs), compressée en `.tar.gz` horodaté avec rotation automatique des archives de plus de 14 jours.
+
+```bash
+nano /root/backup-holodeck.sh
+```
+*(voir le fichier `backup-holodeck.sh` du dépôt pour le contenu complet)*
+
+```bash
+chmod +x /root/backup-holodeck.sh
+/root/backup-holodeck.sh
+ls -lh /root/backups/
+```
+
+Automatisation via cron (exécution quotidienne à 03h00) :
+```bash
+nano /root/install-cron.sh
+```
+*(voir le fichier `install-cron.sh` du dépôt)*
+
+```bash
+chmod +x /root/install-cron.sh
+/root/install-cron.sh
+crontab -l
+```
+
+## 19. Sources
 
 | Sujet | Lien officiel |
 |---|---|
@@ -587,6 +695,7 @@ gpasswd -d <utilisateur> sudo
 | OpenLDAP — documentation | https://openldap.org/doc/ |
 | Cockpit Project — documentation | https://cockpit-project.org/documentation.html |
 | Netfilter/iptables — documentation | https://www.netfilter.org/documentation/index.html#documentation-howto |
+| Debian Wiki — Xfce | https://wiki.debian.org/Xfce |
+| code-server (Coder) — documentation | https://coder.com/docs/code-server |
 
 ---
-
