@@ -590,6 +590,5 @@ gpasswd -d <utilisateur> sudo
 
 ---
 
-## Auteur
 
 - Prénom Nom
